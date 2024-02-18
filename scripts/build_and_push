@@ -6,10 +6,9 @@ images=(
   "taskfile"
   "toolkit"
   )
-
+ls
 for i in "${images[@]}"; do
-  cd "../$i" || exit
-  docker build . -t "${REGISTRY}/${i}" || exit
+  docker build ./$i -t "${REGISTRY}/${i}" || exit
   docker push "${REGISTRY}/${i}" || exit
 done
 
