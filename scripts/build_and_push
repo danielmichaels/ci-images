@@ -1,0 +1,15 @@
+set -exuo
+
+REGISTRY=danielmichaels
+images=(
+  "goose"
+  "taskfile"
+  "toolkit"
+  )
+
+for i in "${images[@]}"; do
+  cd "../$i" || exit
+  docker build . -t "${REGISTRY}/${i}" || exit
+  docker push "${REGISTRY}/${i}" || exit
+done
+
