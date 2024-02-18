@@ -1,2 +1,4 @@
 # ci-images
-CI Images
+
+Common images for use in other projects
+
