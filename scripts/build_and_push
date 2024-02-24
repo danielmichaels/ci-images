@@ -4,12 +4,16 @@ REGISTRY=danielmichaels
 images=(
   "goose"
   "taskfile"
-  "toolkit"
   "goa"
+  "templ"
   )
 ls
 for i in "${images[@]}"; do
-  docker build ./$i -t "${REGISTRY}/${i}" || exit
+  docker build ./"$i" -t "${REGISTRY}/${i}" || exit
   docker push "${REGISTRY}/${i}" || exit
 done
 
+# Now we can build toolkit as all the other images
+# will be updated in Dockerhub
+docker build ./toolkit -t "${REGISTRY}/toolkit"
+docker push "${REGISTRY}/toolkit"
