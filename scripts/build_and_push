@@ -5,6 +5,7 @@ images=(
   "goose"
   "taskfile"
   "toolkit"
+  "goa"
   )
 ls
 for i in "${images[@]}"; do
