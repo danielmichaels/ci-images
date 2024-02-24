@@ -10,11 +10,11 @@ images=(
 )
 
 for i in "${images[@]}"; do
-  docker build ./"$i" -t "${REGISTRY}/${i}" || exit
-  docker push "${REGISTRY}/${i}" || exit
+  docker build ./"$i" -t "${REGISTRY}/ci-${i}" || exit
+  docker push "${REGISTRY}/ci-${i}" || exit
 done
 
 # Now we can build toolkit as all the other images
 # will be updated in Dockerhub
-docker build ./toolkit -t "${REGISTRY}/toolkit"
-docker push "${REGISTRY}/toolkit"
+docker build ./toolkit -t "${REGISTRY}/ci-toolkit"
+docker push "${REGISTRY}/ci-toolkit"
