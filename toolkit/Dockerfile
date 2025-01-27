@@ -1,11 +1,15 @@
-FROM danielmichaels/ci-goose as goose
-FROM danielmichaels/ci-taskfile as taskfile
-FROM danielmichaels/ci-goa as goa
-FROM danielmichaels/ci-templ as templ
+FROM danielmichaels/ci-goose AS goose
+FROM danielmichaels/ci-taskfile AS taskfile
+FROM danielmichaels/ci-goa AS goa
+FROM danielmichaels/ci-templ AS templ
+FROM danielmichaels/ci-linters AS linters
 
-FROM golang:1.22-bookworm
+FROM golang:1.23-bookworm
 
 COPY --from=goose ["/usr/local/bin/goose", "/usr/local/bin/goose"]
 COPY --from=goa ["/go/bin/goa", "/usr/local/bin/goa"]
 COPY --from=templ ["/go/bin/templ", "/usr/local/bin/templ"]
 COPY --from=taskfile ["/usr/local/bin/task", "/usr/local/bin/task"]
+COPY --from=linters ["/go/bin/betteralign", "/usr/local/bin/betteralign"]
+COPY --from=linters ["/go/bin/gofumpt", "/usr/local/bin/gofumpt"]
+COPY --from=linters ["/go/bin/golines", "/usr/local/bin/golines"]
