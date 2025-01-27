@@ -3,15 +3,16 @@ set -exuo
 
 REGISTRY=danielmichaels
 images=(
-  "goose"
-  "taskfile"
-  "goa"
-  "templ"
+	"goose"
+	"taskfile"
+	"goa"
+	"templ"
+	"linters"
 )
 
 for i in "${images[@]}"; do
-  docker build ./"$i" -t "${REGISTRY}/ci-${i}" || exit
-  docker push "${REGISTRY}/ci-${i}" || exit
+	docker build ./"$i" -t "${REGISTRY}/ci-${i}" || exit
+	docker push "${REGISTRY}/ci-${i}" || exit
 done
 
 # Now we can build toolkit as all the other images
