@@ -1,4 +1,4 @@
-FROM golang:1.23-bookworm
+FROM golang:1.24-bookworm
 
 # /go/bin/betteralign
 RUN go install github.com/dkorunic/betteralign/cmd/betteralign@latest

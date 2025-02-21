@@ -1,4 +1,4 @@
-FROM golang:1.23-bookworm
+FROM golang:1.24-bookworm
 
 RUN curl -fsSL \
         https://raw.githubusercontent.com/pressly/goose/master/install.sh | sh
