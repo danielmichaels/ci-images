@@ -5,7 +5,7 @@ FROM danielmichaels/ci-templ AS templ
 FROM danielmichaels/ci-linters AS linters
 FROM golangci/golangci-lint:latest AS golangci
 
-FROM golang:1.24-bookworm
+FROM golang:1.23-bookworm
 
 COPY --from=goose ["/usr/local/bin/goose", "/usr/local/bin/goose"]
 COPY --from=goa ["/go/bin/goa", "/usr/local/bin/goa"]
