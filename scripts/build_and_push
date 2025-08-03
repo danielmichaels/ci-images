@@ -11,11 +11,9 @@ images=(
 )
 
 for i in "${images[@]}"; do
-	docker build ./"$i" -t "${REGISTRY}/ci-${i}" || exit
-	docker push "${REGISTRY}/ci-${i}" || exit
+	docker buildx build --platform linux/amd64,linux/arm64 ./"$i" -t "${REGISTRY}/ci-${i}" --push || exit
 done
 
 # Now we can build toolkit as all the other images
 # will be updated in Dockerhub
-docker build ./toolkit -t "${REGISTRY}/ci-toolkit"
-docker push "${REGISTRY}/ci-toolkit"
+docker buildx build --platform linux/amd64,linux/arm64 ./toolkit -t "${REGISTRY}/ci-toolkit" --push
