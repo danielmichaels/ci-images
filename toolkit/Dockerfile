@@ -3,6 +3,7 @@ FROM danielmichaels/ci-taskfile AS taskfile
 FROM danielmichaels/ci-goa AS goa
 FROM danielmichaels/ci-templ AS templ
 FROM danielmichaels/ci-linters AS linters
+FROM danielmichaels/ci-tailwind AS tailwind
 FROM golangci/golangci-lint:latest AS golangci
 
 FROM golang:1.24-bookworm
@@ -15,3 +16,4 @@ COPY --from=linters ["/go/bin/betteralign", "/usr/local/bin/betteralign"]
 COPY --from=linters ["/go/bin/gofumpt", "/usr/local/bin/gofumpt"]
 COPY --from=linters ["/go/bin/golines", "/usr/local/bin/golines"]
 COPY --from=golangci ["/usr/bin/golangci-lint", "/usr/local/bin/golangci-lint"]
+COPY --from=tailwind ["/usr/local/bin/tailwindcss", "/usr/local/bin/tailwindcss"]

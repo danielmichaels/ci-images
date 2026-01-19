@@ -8,6 +8,7 @@ images=(
 	"goa"
 	"templ"
 	"linters"
+	"tailwind"
 )
 
 for i in "${images[@]}"; do
