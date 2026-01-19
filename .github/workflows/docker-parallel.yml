@@ -1,0 +1,63 @@
+name: Push to DockerHub (Parallel)
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Runs at 00:00 UTC every Sunday
+  workflow_dispatch:
+
+env:
+  REGISTRY: danielmichaels
+
+jobs:
+  build-base-images:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [goose, taskfile, goa, templ, linters, tailwind]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: danielmichaels
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push ${{ matrix.image }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ./${{ matrix.image }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.REGISTRY }}/ci-${{ matrix.image }}:latest
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  build-toolkit:
+    runs-on: ubuntu-latest
+    needs: build-base-images
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: danielmichaels
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push toolkit
+        uses: docker/build-push-action@v6
+        with:
+          context: ./toolkit
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.REGISTRY }}/ci-toolkit:latest
+          cache-from: type=gha,scope=toolkit
+          cache-to: type=gha,mode=max,scope=toolkit
