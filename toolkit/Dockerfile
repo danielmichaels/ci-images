@@ -6,7 +6,7 @@ FROM danielmichaels/ci-linters AS linters
 FROM danielmichaels/ci-tailwind AS tailwind
 FROM golangci/golangci-lint:latest AS golangci
 
-FROM golang:1.24-bookworm
+FROM golang:1.26-bookworm
 
 COPY --from=goose ["/usr/local/bin/goose", "/usr/local/bin/goose"]
 COPY --from=goa ["/go/bin/goa", "/usr/local/bin/goa"]
