@@ -1,3 +1,3 @@
 FROM golang:1.26-bookworm
 
-RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+RUN go install github.com/go-task/task/v3/cmd/task@latest
