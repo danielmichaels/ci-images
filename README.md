@@ -250,8 +250,21 @@ only at that merge, so `ci-goa:latest` never points at a half-built pair.
 
 `ci-toolkit` waits on both paths, since it copies from all six.
 
-One consequence: pushing by digest leaves untagged manifests in the registry,
-which accumulate weekly. They are harmless but worth pruning occasionally.
+**Do not bulk-delete untagged versions of `ci-goa`.** The per-architecture
+manifests are pushed untagged and stay that way permanently: `ci-goa:latest`
+is an index that references them by digest, and nothing ever tags them
+directly. The usual GHCR advice of "prune untagged versions" would delete the
+actual amd64 and arm64 images out from under every multi-arch tag.
+
+Only manifests orphaned by a *failed* run are safe to remove, and finding them
+means comparing against what the live indexes reference:
+
+```sh
+docker manifest inspect ghcr.io/danielmichaels/ci-goa:latest \
+  | jq -r '.manifests[].digest'
+```
+
+Anything not in that list, and not itself a tagged index, is orphaned.
 
 Trigger it by hand with:
 
