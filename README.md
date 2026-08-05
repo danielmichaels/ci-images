@@ -156,12 +156,17 @@ bookworm, but the linkage is mixed rather than uniform:
 
 | Statically linked | Dynamically linked (needs glibc) |
 | --- | --- |
-| `goose`, `gofumpt`, `betteralign`, `golangci-lint` | `goa`, `templ`, `task`, `golines`, `tailwindcss` |
+| `goose`, `task`, `templ`, `gofumpt`, `golines`, `betteralign`, `golangci-lint` | `goa`, `tailwindcss` |
 
-`go install` only links against libc when a package pulls in something like
-`net` or `os/user`, which is why the split looks arbitrary. It can flip when a
-tool picks up a new dependency, so treat the table as a snapshot and design for
-the glibc case.
+Most tools are taken from upstream release binaries, which are built with
+`CGO_ENABLED=0` and are therefore static. The two exceptions are `goa`, which
+publishes no prebuilt binaries and so is compiled with `go install` against
+glibc, and `tailwindcss`, whose glibc build we deliberately prefer over the
+musl one.
+
+Linkage can flip when a tool changes how it is released or picks up a
+dependency pulling in `net` or `os/user`, so treat the table as a snapshot and
+design for the glibc case.
 
 So the target must be glibc-based: Debian, Ubuntu, or distroless `*-debian12`.
 On Alpine or any other musl image, a dynamically linked binary fails with
@@ -200,16 +205,20 @@ everything that is broken:
 ```
 
 ```
-building goose     ... ok
-building taskfile  ... ok
-building goa       ... FAILED  (log: /tmp/tmp.AbC123/goa.log)
-building templ     ... ok
-building linters   ... ok
-building tailwind  ... ok
+building goose     ... ok          6s
+building taskfile  ... ok         17s
+building goa       ... FAILED     42s  (log: /tmp/tmp.AbC123/goa.log)
+building templ     ... ok          5s
+building linters   ... ok         12s
+building tailwind  ... ok          1s
 building toolkit   ... skipped (goa failed)
 
 1 of 7 failed: goa
 ```
+
+Times are for the host architecture only. CI builds two architectures with one
+emulated, so treat these as a relative signal — an image that is slow here will
+be disproportionately slower there.
 
 It exits non-zero if anything failed. Because `toolkit` copies from the other
 six, it is skipped unless they all succeed.
@@ -233,6 +242,14 @@ gh run watch
 1. Create `<tool>/Dockerfile` based on `golang:1.26-bookworm`. Do not use
    Alpine — the glibc guarantee above is what makes `COPY --from` work for
    consumers.
+
+   **Prefer the upstream release binary over `go install`.** Images are built
+   for two architectures and the non-native one runs under QEMU, where Go
+   compilation is roughly an order of magnitude slower. Compiling `task` cost
+   over 20 minutes and produced a 2.6GB image because its remote-taskfile
+   support pulls in the AWS and GCP SDKs; downloading the same binary takes
+   seconds. Only fall back to `go install` when a project ships no binaries,
+   as with `goa`.
 2. Add the directory name to the `image` matrix in the workflow and to
    `images` in `scripts/verify`.
 3. If it belongs in the combined image, add a `COPY --from` line to

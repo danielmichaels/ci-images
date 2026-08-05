@@ -24,13 +24,16 @@ images=(
 failed=()
 
 build() {
-	local name=$1
+	local name=$1 start elapsed
 	shift
 	printf 'building %-9s ... ' "$name"
+	start=$(date +%s)
 	if docker build "$@" >"${LOGS}/${name}.log" 2>&1; then
-		echo "ok"
+		elapsed=$(($(date +%s) - start))
+		printf 'ok       %4ds\n' "$elapsed"
 	else
-		echo "FAILED  (log: ${LOGS}/${name}.log)"
+		elapsed=$(($(date +%s) - start))
+		printf 'FAILED   %4ds  (log: %s)\n' "$elapsed" "${LOGS}/${name}.log"
 		failed+=("$name")
 	fi
 }
