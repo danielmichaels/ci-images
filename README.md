@@ -235,10 +235,23 @@ six, it is skipped unless they all succeed.
 
 ### Publishing
 
-Publishing is CI's job — there is no push script. `.github/workflows/docker-parallel.yml`
-runs every Sunday at 00:00 UTC and builds the six base images in parallel
-(`fail-fast: false`, so one broken tool does not hide the other five), then
-builds `ci-toolkit` from them.
+Publishing is CI's job — there is no push script.
+`.github/workflows/docker-parallel.yml` runs every Sunday at 00:00 UTC with
+`fail-fast: false`, so one broken tool does not hide the others.
+
+The five download-only images build both architectures in a single job each:
+QEMU costs almost nothing when the work is `curl` and `tar`. `goa` is handled
+separately because it is the only image still compiled from source, and so the
+only one that genuinely pays for emulation. It builds on a native runner per
+architecture (`ubuntu-latest` and `ubuntu-24.04-arm`), pushes each result
+**by digest** with no tag, and a `merge-goa` job stitches them into one
+multi-arch manifest with `docker buildx imagetools create`. Tags are applied
+only at that merge, so `ci-goa:latest` never points at a half-built pair.
+
+`ci-toolkit` waits on both paths, since it copies from all six.
+
+One consequence: pushing by digest leaves untagged manifests in the registry,
+which accumulate weekly. They are harmless but worth pruning occasionally.
 
 Trigger it by hand with:
 
