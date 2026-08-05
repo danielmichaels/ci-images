@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Local pre-flight check. Builds every image for the host architecture and
+# pushes nothing; publishing is CI's job, see
+# .github/workflows/docker-parallel.yml.
+#
+# Unlike CI this is sequential, but a failing image does not stop the rest so
+# one run tells you everything that is broken.
+set -uo pipefail
+
+cd "$(dirname "$0")/.." || exit 1
+
+REGISTRY="${REGISTRY:-ghcr.io/danielmichaels}"
+TAG="${TAG:-verify}"
+LOGS="$(mktemp -d)"
+
+images=(
+	"goose"
+	"taskfile"
+	"goa"
+	"templ"
+	"linters"
+	"tailwind"
+)
+failed=()
+
+build() {
+	local name=$1
+	shift
+	printf 'building %-9s ... ' "$name"
+	if docker build "$@" >"${LOGS}/${name}.log" 2>&1; then
+		echo "ok"
+	else
+		echo "FAILED  (log: ${LOGS}/${name}.log)"
+		failed+=("$name")
+	fi
+}
+
+for i in "${images[@]}"; do
+	build "$i" -t "${REGISTRY}/ci-${i}:${TAG}" "./${i}"
+done
+
+# The bases are tagged with the same REGISTRY/TAG that toolkit's FROM lines
+# resolve to, so buildkit finds them in the local image store and nothing has
+# to be pushed to check that toolkit still assembles.
+if ((${#failed[@]})); then
+	printf 'building %-9s ... skipped (%s failed)\n' "toolkit" "${failed[*]}"
+else
+	build "toolkit" \
+		--build-arg "REGISTRY=${REGISTRY}" \
+		--build-arg "TAG=${TAG}" \
+		-t "${REGISTRY}/ci-toolkit:${TAG}" \
+		"./toolkit"
+fi
+
+echo
+if ((${#failed[@]})); then
+	echo "${#failed[@]} of $((${#images[@]} + 1)) failed: ${failed[*]}"
+	exit 1
+fi
+echo "all $((${#images[@]} + 1)) images built"

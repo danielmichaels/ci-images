@@ -1,13 +1,18 @@
-FROM danielmichaels/ci-goose AS goose
-FROM danielmichaels/ci-taskfile AS taskfile
-FROM danielmichaels/ci-goa AS goa
-FROM danielmichaels/ci-templ AS templ
-FROM danielmichaels/ci-linters AS linters
-FROM danielmichaels/ci-tailwind AS tailwind
+ARG REGISTRY=ghcr.io/danielmichaels
+ARG TAG=latest
+
+FROM ${REGISTRY}/ci-goose:${TAG} AS goose
+FROM ${REGISTRY}/ci-taskfile:${TAG} AS taskfile
+FROM ${REGISTRY}/ci-goa:${TAG} AS goa
+FROM ${REGISTRY}/ci-templ:${TAG} AS templ
+FROM ${REGISTRY}/ci-linters:${TAG} AS linters
+FROM ${REGISTRY}/ci-tailwind:${TAG} AS tailwind
 FROM golangci/golangci-lint:latest AS golangci
 
 FROM golang:1.26-bookworm
 
+# Everything lands in /usr/local/bin so downstream images have a single,
+# predictable path to COPY --from.
 COPY --from=goose ["/usr/local/bin/goose", "/usr/local/bin/goose"]
 COPY --from=goa ["/go/bin/goa", "/usr/local/bin/goa"]
 COPY --from=templ ["/go/bin/templ", "/usr/local/bin/templ"]
