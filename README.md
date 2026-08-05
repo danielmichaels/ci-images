@@ -47,7 +47,7 @@ All images are `linux/amd64` and `linux/arm64`.
 | `ci-templ` | `templ` | `/go/bin/templ` |
 | `ci-linters` | `betteralign`, `gofumpt`, `golines` | `/go/bin/` |
 | `ci-tailwind` | `tailwindcss` | `/usr/local/bin/tailwindcss` |
-| `ci-goa` | `goa`, `protoc` | `/go/bin/goa`, `/usr/bin/protoc` |
+| `ci-goa` | `goa`, `protoc` (+ well-known types in `/usr/include/google/protobuf`) | `/go/bin/goa`, `/usr/bin/protoc` |
 | | `protoc-gen-go`, `protoc-gen-grpc-gateway`, `protoc-gen-openapiv2`, `protoc-gen-swagger` | `/go/bin/` |
 | `ci-toolkit` | everything below | `/usr/local/bin/` |
 
@@ -69,6 +69,16 @@ Two things worth knowing:
 - `ci-toolkit` takes `goa` but **not** `protoc` or the `protoc-gen-*` plugins.
   If you generate protobuf code, use `ci-goa` or copy those binaries across
   explicitly.
+- **`protoc` is not just a binary.** It needs the well-known types
+  (`google/protobuf/timestamp.proto` and friends) that ship beside it in
+  `/usr/include/google/protobuf`. Copying `/usr/bin/protoc` on its own gives
+  you a compiler that fails on any `import "google/protobuf/..."`, so take
+  both:
+
+  ```dockerfile
+  COPY --from=tools /usr/bin/protoc          /usr/bin/protoc
+  COPY --from=tools /usr/include/google      /usr/include/google
+  ```
 
 `ci-tailwind` is built `FROM scratch`. It holds a single static binary and has
 no shell, so it exists purely as a `COPY --from` source — `docker run` on it
