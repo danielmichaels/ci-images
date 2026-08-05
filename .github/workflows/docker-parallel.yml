@@ -103,6 +103,13 @@ jobs:
 
       # Pushed by digest and left untagged; merge-goa applies the tags once
       # both architectures exist, so :latest never points at a half-built pair.
+      #
+      # provenance must stay off. With it on, buildx pushes an index whose
+      # attestation records the target image name, so the same build yields a
+      # different digest in each registry and no single reported digest
+      # resolves in both. Disabling it pushes a plain manifest whose digest is
+      # pure content, identical in GHCR and Docker Hub, and incidentally leaves
+      # one untagged manifest behind per push instead of three.
       - name: Build and push goa by digest (${{ matrix.arch }})
         id: build
         uses: docker/build-push-action@v7
@@ -111,6 +118,7 @@ jobs:
           platforms: ${{ matrix.platform }}
           pull: true
           no-cache: true
+          provenance: false
           outputs: |
             type=image,name=${{ env.GHCR }}/ci-goa,push-by-digest=true,name-canonical=true,push=true
             type=image,name=${{ env.DOCKERHUB }}/ci-goa,push-by-digest=true,name-canonical=true,push=true
