@@ -18,7 +18,7 @@ RUN set -eu; \
     curl -fsSL "https://github.com/protocolbuffers/protobuf/releases/download/v${VER}/protoc-${VER}-linux-${ARCH}.zip" -o /tmp/protoc.zip; \
     unzip -q /tmp/protoc.zip 'bin/*' 'include/*' -d /out
 
-FROM golang:1.26-bookworm
+FROM golang:1.27-bookworm
 
 # goa publishes no prebuilt binaries, so these are compiled. Keeping the RUN
 # ahead of the COPY lets buildkit fetch protoc concurrently with the compile
