@@ -24,7 +24,7 @@ RUN set -eu; \
     curl -fsSL "https://github.com/mvdan/gofumpt/releases/download/${GOFUMPT}/gofumpt_${GOFUMPT}_linux_${TARGETARCH}" -o /out/gofumpt; \
     chmod +x /out/gofumpt
 
-FROM golang:1.26-bookworm
+FROM golang:1.27-bookworm
 COPY --from=downloader /out/betteralign /go/bin/betteralign
 COPY --from=downloader /out/golines /go/bin/golines
 COPY --from=downloader /out/gofumpt /go/bin/gofumpt

@@ -13,5 +13,5 @@ RUN ARCH=$([ "$TARGETARCH" = "arm64" ] && echo arm64 || echo x86_64) \
     && curl -fsSL "https://github.com/a-h/templ/releases/latest/download/templ_Linux_${ARCH}.tar.gz" \
     | tar -xz -C /out templ
 
-FROM golang:1.26-bookworm
+FROM golang:1.27-bookworm
 COPY --from=downloader /out/templ /go/bin/templ

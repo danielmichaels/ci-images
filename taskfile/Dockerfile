@@ -14,5 +14,5 @@ RUN mkdir -p /out \
     && curl -fsSL "https://github.com/go-task/task/releases/latest/download/task_linux_${TARGETARCH}.tar.gz" \
     | tar -xz -C /out task
 
-FROM golang:1.26-bookworm
+FROM golang:1.27-bookworm
 COPY --from=downloader /out/task /go/bin/task

@@ -9,7 +9,7 @@ FROM ${REGISTRY}/ci-linters:${TAG} AS linters
 FROM ${REGISTRY}/ci-tailwind:${TAG} AS tailwind
 FROM golangci/golangci-lint:latest AS golangci
 
-FROM golang:1.26-bookworm
+FROM golang:1.27-bookworm
 
 # Everything lands in /usr/local/bin so downstream images have a single,
 # predictable path to COPY --from.

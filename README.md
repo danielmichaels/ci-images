@@ -3,7 +3,7 @@
 Prebuilt container images carrying the Go toolchain and code-generation tools I
 use across projects, so CI jobs don't spend minutes on `go install` every run.
 
-Each image is a thin layer over `golang:1.26-bookworm` containing one tool (or
+Each image is a thin layer over `golang:1.27-bookworm` containing one tool (or
 one family of tools). `ci-toolkit` gathers all of them into a single image.
 
 ## Registries
@@ -129,7 +129,7 @@ need — the stage is discarded and contributes nothing to your final image size
 # syntax=docker/dockerfile:1
 FROM ghcr.io/danielmichaels/ci-toolkit:2026-08-05 AS tools
 
-FROM golang:1.26-bookworm AS build
+FROM golang:1.27-bookworm AS build
 COPY --from=tools /usr/local/bin/templ /usr/local/bin/templ
 COPY --from=tools /usr/local/bin/task  /usr/local/bin/task
 
@@ -275,7 +275,7 @@ gh run watch
 
 ### Adding a tool
 
-1. Create `<tool>/Dockerfile` based on `golang:1.26-bookworm`. Do not use
+1. Create `<tool>/Dockerfile` based on `golang:1.27-bookworm`. Do not use
    Alpine — the glibc guarantee above is what makes `COPY --from` work for
    consumers.
 
